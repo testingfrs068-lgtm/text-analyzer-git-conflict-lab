@@ -27,13 +27,21 @@ def count_words_and_sentences(text: str) -> dict:
 
 def summarize_text(text: str, max_sentences: int = 2) -> str:
     """
-    Generate a short extractive summary of the given text.
-    Baseline implementation: returns the first max_sentences sentences.
+    Generate an extractive summary by scoring sentences based on top keywords.
+    Added in feature/keyword-scoring branch.
     """
     sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", text.strip()) if s.strip()]
     if not sentences:
         return ""
-    return " ".join(sentences[:max_sentences])
+
+    freq = dict(top_keywords(text, n=10))
+    scored = []
+    for idx, sent in enumerate(sentences):
+        score = sum(freq.get(w.lower(), 0) for w in re.findall(r"\b[a-zA-Z]{3,}\b", sent))
+        scored.append((score, idx, sent))
+
+    top = sorted(sorted(scored, key=lambda x: (-x[0], x[1]))[:max_sentences], key=lambda x: x[1])
+    return " ".join(s[2] for s in top)
 
 
 def top_keywords(text: str, n: int = 5) -> list:
