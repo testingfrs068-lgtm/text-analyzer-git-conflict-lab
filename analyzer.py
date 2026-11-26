@@ -25,15 +25,16 @@ def count_words_and_sentences(text: str) -> dict:
     }
 
 
-def summarize_text(text: str, max_sentences: int = 2) -> str:
+def summarize_text(text: str, max_sentences: int = 2, min_words: int = 6) -> str:
     """
-    Generate a short extractive summary of the given text.
-    Baseline implementation: returns the first max_sentences sentences.
+    Generate a short summary after filtering out short sentences.
+    Added in feature/length-filter branch.
     """
     sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", text.strip()) if s.strip()]
-    if not sentences:
-        return ""
-    return " ".join(sentences[:max_sentences])
+    filtered = [s for s in sentences if len(re.findall(r"\b\w+\b", s)) >= min_words]
+    if not filtered:
+        filtered = sentences
+    return " ".join(filtered[:max_sentences])
 
 
 def top_keywords(text: str, n: int = 5) -> list:
